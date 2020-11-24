@@ -2111,12 +2111,11 @@ addstar(fname, len)
  *
  * This function may be called recursively!
  */
-	int
-dosource(fname)
-	register char *fname;
+int
+dosource(char *fname)
 {
-	register FILE *fp;
-	register char *s;
+	FILE *fp;
+	char *s;
 
 	expand_env(fname, IObuff, IOSIZE);		/* use IObuff for expanded name */
 	if ((fp = fopen(IObuff, "r")) == NULL)

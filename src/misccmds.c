@@ -526,7 +526,7 @@ gcharCurpos()
 inindent()
 {
 	register char *ptr;
-	register int col;
+	unsigned int col;
 
 	for (col = 0, ptr = nr2ptr(Curpos.lnum); isspace(*ptr++); ++col)
 		;
@@ -675,11 +675,8 @@ beep()
  * Expand environment variable with path name.
  * If anything fails no expansion is done and dst equals src.
  */
-	void
-expand_env(src, dst, dstlen)
-	char	*src;			/* input string e.g. "$HOME/vim.hlp" */
-	char	*dst;			/* where to put the result */
-	int		dstlen;			/* maximum length of the result */
+void
+expand_env(char *src, char *dst, size_t dstlen)
 {
 	char	*tail;
 	int		c;
