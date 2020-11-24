@@ -25,7 +25,7 @@
 #include <sys/types.h>
 #include <signal.h>
 
-#ifdef SYSV
+#if defined(SYSV) || defined(__unix__)
 # include <poll.h>
 # include <termio.h>
 #else
