@@ -670,36 +670,3 @@ beep()
 	else
 	    outchar('\007');
 }
-
-/* 
- * Expand environment variable with path name.
- * If anything fails no expansion is done and dst equals src.
- */
-void
-expand_env(char *src, char *dst, size_t dstlen)
-{
-	char	*tail;
-	int		c;
-	char	*var;
-
-	if (*src == '$')
-	{
-		for (tail = src + 1; *tail; ++tail)
-			if (*tail == PATHSEP)
-				break;
-		c = *tail;
-		*tail = NUL;
-		var = getenv(src + 1);
-		*tail = c;
-		if (*tail)
-			++tail;
-		if (var && strlen(var) + strlen(tail) + 1 < dstlen)
-		{
-			strcpy(dst, var);
-			strcat(dst, PATHSEPSTR);
-			strcat(dst, tail);
-			return;
-		}
-	}
-	strncpy(dst, src, (size_t)dstlen);
-}

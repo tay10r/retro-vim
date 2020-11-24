@@ -8,6 +8,10 @@
  *							G. R. (Fred) Walter		watmath!watcgl!grwalter 
  */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #if defined(SYSV) || defined(BSD)
 # ifndef UNIX
 #  define UNIX
@@ -46,7 +50,7 @@
 #     include <sys/types.h>
 #     include <sys/stat.h>
 #   else
-#     include <stat.h>
+#     include <sys/stat.h>
 #   endif
 #  endif
 # endif
@@ -233,3 +237,7 @@ struct fpos
 		linenr_t		lnum;	/* line number */
 		colnr_t 		col;	/* column number */
 };
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
