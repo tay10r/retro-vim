@@ -22,9 +22,17 @@ public:
 	constexpr Token(TokenKind kind_, const std::string_view &text_) noexcept
 	  : kind(kind_), text(text_) {}
 
-	constexpr std::string_view get_text() const noexcept { return text; }
+	constexpr std::string_view
+	get_text() const noexcept
+	{
+		return text;
+	}
 
-	constexpr bool operator == (TokenKind other_k) const noexcept { return kind == other_k; }
+	constexpr bool
+	operator==(TokenKind other_k) const noexcept
+	{
+		return kind == other_k;
+	}
 };
 
 class Lexer final {
@@ -33,12 +41,16 @@ class Lexer final {
   public:
 	constexpr Lexer(const std::string_view &t) noexcept : text(t) {}
 
-	constexpr bool is_done() const noexcept { return pos >= text.size(); }
+	constexpr bool
+	is_done() const noexcept
+	{
+		return pos >= text.size();
+	}
 
 	constexpr Token
 	lex() noexcept
 	{
-		if (this->peek(0) == '$')
+		if ((this->peek(0) == '$') && is_non_digit(this->peek(1)))
 			return lex_var_ref(1);
 		else
 			return lex_normal(1);

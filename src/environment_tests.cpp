@@ -26,20 +26,20 @@ FakeEnv::get_value(const std::string_view &key) const
 TEST(environment, expand_env)
 {
 	FakeEnv env;
-	auto result = vim::expand_env("$FOO/$BAR$MISSING", env);
+	auto result = vim::expand_env("$FOO/$BAR", env);
 	EXPECT_EQ(result, "foo/bar");
 }
 
 TEST(environment, expand_env_no_refs)
 {
 	FakeEnv env;
-	auto result = vim::expand_env("$MISSING ", env);
-	EXPECT_EQ(result, " ");
+	auto result = vim::expand_env("$MISSING$FOO", env);
+	EXPECT_EQ(result, "foo");
 }
 
 TEST(environment, expand_env_single_dollar_sign)
 {
 	FakeEnv env;
-	auto result = vim::expand_env("$ nothing", env);
-	EXPECT_EQ(result, "$ nothing");
+	auto result = vim::expand_env("$ $FOO", env);
+	EXPECT_EQ(result, "$ foo");
 }
