@@ -17,7 +17,7 @@
 #ifdef TERMCAP
 # ifdef linux
 #  include <termcap.h>
-#  define TPUTSFUNCAST (outfuntype)
+#  define TPUTSFUNCAST (int (*)(int))
 # else
 #  define TPUTSFUNCAST
 #  ifdef AMIGA
