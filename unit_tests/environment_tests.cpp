@@ -4,6 +4,8 @@
 
 namespace {
 
+using namespace std::literals;
+
 class FakeEnv final
 {
 public:
@@ -21,18 +23,32 @@ public:
 
 TEST(environment, expand_env)
 {
-	auto result = vim::expand_env("$FOO/$BAR", FakeEnv{});
-	EXPECT_EQ(result, "foo/bar");
+	auto Result = vim::expand_env("$FOO/$BAR"sv, FakeEnv{});
+	EXPECT_EQ(Result, "foo/bar"sv);
 }
 
 TEST(environment, expand_env_no_refs)
 {
-	auto result = vim::expand_env("$MISSING$FOO", FakeEnv{});
-	EXPECT_EQ(result, "foo");
+	auto Result = vim::expand_env("$MISSING$FOO"sv, FakeEnv{});
+	EXPECT_EQ(Result, "foo"sv);
 }
 
 TEST(environment, expand_env_single_dollar_sign)
 {
-	auto result = vim::expand_env("$ $FOO", FakeEnv{});
-	EXPECT_EQ(result, "$ foo");
+	auto Result = vim::expand_env("$ $FOO"sv, FakeEnv{});
+	EXPECT_EQ(Result, "$ foo"sv);
+}
+
+TEST(environment, expand_env_wchar_t)
+{
+	auto FakeEnv = [](const std::wstring_view &Key) -> std::wstring_view {
+		if (Key == L"var")
+			return L"value";
+		else
+			return L"";
+	};
+
+	auto Result = vim::expand_env(std::wstring_view(L" $var "), FakeEnv);
+
+	EXPECT_EQ(Result, L" value ");
 }

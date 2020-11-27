@@ -6,8 +6,8 @@
 
 namespace vim {
 
-template <typename Environment>
-auto expand_env(const std::string_view &input, const Environment &) -> std::string;
+template <typename char_type, typename environment>
+auto expand_env(const std::basic_string_view<char_type> &, const environment &) -> std::basic_string<char_type>;
 
 } // namespace vim
 

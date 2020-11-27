@@ -18,7 +18,7 @@ extern "C" void expand_env(const char *src, char *dst, size_t dstlen) {
 		return std::getenv(KeyCopy.c_str());
 	};
 
-	auto result = vim::expand_env(src, SystemEnv);
+	auto result = vim::expand_env(std::string_view(src), SystemEnv);
 
 	auto min_size = std::min(result.size(), dstlen - 1);
 

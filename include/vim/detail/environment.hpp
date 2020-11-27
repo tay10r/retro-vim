@@ -16,36 +16,46 @@ enum class token_kind
 	normal
 };
 
+template <typename char_type>
 class token final
 {
 	token_kind Kind = token_kind::normal;
-	std::string_view Text;
+	std::basic_string_view<char_type> Text;
 public:
-	constexpr token(token_kind K, const std::string_view &T) noexcept : Kind(K), Text(T) {}
+	constexpr token() = default;
 
-	constexpr auto get_text() const noexcept -> std::string_view { return Text; }
+	constexpr token(token_kind K, const std::basic_string_view<char_type> &T) noexcept : Kind(K), Text(T) {}
+
+	constexpr auto get_text() const noexcept { return Text; }
 
 	constexpr auto operator==(token_kind K) const noexcept { return Kind == K; }
 };
 
+template <typename char_type>
 class lexer final {
-	std::string_view Text;
+	std::basic_string_view<char_type> Text;
 	std::size_t Index = 0;
   public:
-	constexpr lexer(const std::string_view &T) noexcept : Text(T) {}
+	constexpr lexer(const std::basic_string_view<char_type> &T) noexcept : Text(T) {}
 
 	constexpr auto is_done() const noexcept { return Index >= Text.size(); }
 
-	constexpr auto lex() noexcept -> token
+	constexpr auto lex() noexcept -> token<char_type>
 	{
-		if ((this->peek(0) == '$') && is_non_digit(this->peek(1)))
+		auto FirstChar = this->peek(0);
+		if (!FirstChar)
+			return token<char_type> {};
+
+		if (are_equal(*FirstChar, '$') && is_non_digit(this->peek(1)))
 			return lex_var_ref(1);
 		else
 			return lex_normal(1);
 	}
   protected:
 
-	static constexpr auto in_range(std::optional<char> C, char Lo, char Hi) noexcept
+	static constexpr auto are_equal(char_type A, char_type B) noexcept { return A == B; }
+
+	static constexpr auto in_range(std::optional<char_type> C, char_type Lo, char_type Hi) noexcept
 	{
 		if (!C)
 			return false;
@@ -53,17 +63,17 @@ class lexer final {
 			return in_range(*C, Lo, Hi);
 	}
 
-	static constexpr auto in_range(char C, char Lo, char Hi) noexcept -> bool
+	static constexpr auto in_range(char_type C, char_type Lo, char_type Hi) noexcept -> bool
 	{
 		return (C >= Lo) && (C <= Hi);
 	}
 
-	static constexpr auto is_digit(std::optional<char> C) noexcept -> bool
+	static constexpr auto is_digit(std::optional<char_type> C) noexcept -> bool
 	{
 		return in_range(C, '0', '9');
 	}
 
-	static constexpr auto is_non_digit(std::optional<char> C) noexcept -> bool
+	static constexpr auto is_non_digit(std::optional<char_type> C) noexcept -> bool
 	{
 		return (C == '_') || in_range(C, 'a', 'z') || in_range(C, 'A', 'Z');
 	}
@@ -73,7 +83,7 @@ class lexer final {
 		return (Index + Offset) >= Text.size();
 	}
 
-	constexpr auto peek(std::size_t Offset) const noexcept -> std::optional<char>
+	constexpr auto peek(std::size_t Offset) const noexcept -> std::optional<char_type>
 	{
 		if (out_of_bounds(Offset))
 			return std::nullopt;
@@ -81,28 +91,29 @@ class lexer final {
 			return Text[Index + Offset];
 	}
 
-	constexpr auto produce(token_kind Kind, std::size_t Length) noexcept -> token
+	constexpr auto produce(token_kind Kind, std::size_t Length) noexcept -> token<char_type>
 	{
-		token Token(Kind, std::string_view(Text.data() + Index, Length));
+		token Token(Kind, std::basic_string_view(Text.data() + Index, Length));
 		Index += Length;
 		return Token;
 	}
 
-	constexpr auto lex_normal(std::size_t StartingOffset) noexcept -> token
+	constexpr auto lex_normal(std::size_t StartingOffset) noexcept -> token<char_type>
 	{
 		auto Length = StartingOffset;
 
 		while (!out_of_bounds(Length))
 		{
-			if (peek(Length) == '$')
-			    break;
+			auto C = peek(Length);
+			if (!C || are_equal(*C, '$'))
+				break;
 			Length++;
 		}
 
 		return produce(token_kind::normal, Length);
 	}
 
-	constexpr auto lex_var_ref(std::size_t StartingOffset) noexcept -> token
+	constexpr auto lex_var_ref(std::size_t StartingOffset) noexcept -> token<char_type>
 	{
 		std::size_t Length = StartingOffset;
 
@@ -118,7 +129,8 @@ class lexer final {
 	}
 };
 
-auto remove_var_prefix(const std::string_view &VarRef) noexcept -> std::string_view
+template <typename char_type>
+auto remove_var_prefix(const std::basic_string_view<char_type> &VarRef) noexcept -> std::basic_string_view<char_type>
 {
 	auto Copy = VarRef;
 	if (Copy.size() < 1)
@@ -129,10 +141,10 @@ auto remove_var_prefix(const std::string_view &VarRef) noexcept -> std::string_v
 
 } // namespace environment_detail
 
-template <typename environment_type>
-auto expand_env(const std::string_view &Input, const environment_type &Env) -> std::string
+template <typename char_type, typename environment>
+auto expand_env(const std::basic_string_view<char_type> &Input, const environment &Env) -> std::basic_string<char_type>
 {
-	std::ostringstream OutputStream;
+	std::basic_ostringstream<char_type> OutputStream;
 
 	environment_detail::lexer Lexer(Input);
 
