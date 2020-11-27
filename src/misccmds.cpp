@@ -1,4 +1,4 @@
-#include "environment.hpp"
+#include <vim/environment.hpp>
 
 #include <algorithm>
 
@@ -13,7 +13,12 @@ extern "C" void expand_env(const char *src, char *dst, size_t dstlen) {
 	if (dstlen < 1)
 		return;
 
-	auto result = vim::expand_env(src, vim::SystemEnv::get_singleton());
+	auto SystemEnv = [](const std::string_view &Key) -> std::string {
+		std::string KeyCopy(Key);
+		return std::getenv(KeyCopy.c_str());
+	};
+
+	auto result = vim::expand_env(src, SystemEnv);
 
 	auto min_size = std::min(result.size(), dstlen - 1);
 
